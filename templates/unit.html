@@ -575,7 +575,7 @@
                             </li>
                         </ul>
                     </nav>
-                    
+
     <main class="col-md-9" style="flex: 0 0 87%; max-width: 100%; padding-left: 3px;">
         <section class="overview">
             <div class="container-fluid">
@@ -707,34 +707,12 @@
                                 </form>
                             </div>
                         </div>
-                        <div class="card shadow mb-4">
-                            <h4>Add Tax Information</h4>
-                            <form id="taxForm" method="post" action="{% url 'billing' %}"> <!-- Adjust URL accordingly -->
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="company-name">Company Name</label>
-                                    <input type="text" id="company-name" name="company_name" required class="form-control" placeholder="Enter company name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="sgst">SGST (%)</label>
-                                    <input type="number" name="sgst" id="sgst" class="form-control" placeholder="Enter SGST percentage" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="cgst">CGST (%)</label>
-                                    <input type="number" name="cgst" id="cgst" class="form-control" placeholder="Enter CGST percentage" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save Tax Info</button>
-                            </form>
-                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-    
-
-    <!-- Add this form after the unit table --> 
-    
+        
     <script>
         const ctx = document.getElementById('stockChart').getContext('2d');
         const stockChart = new Chart(ctx, {
