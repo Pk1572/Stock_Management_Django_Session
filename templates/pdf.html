@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .header table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .header th, .header td {
+            border: none;
+            padding: 5px;
+            text-align: left;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0;
+        }
+        .datetime {
+            text-align: right;
+            font-size: 14px;
+            color: #555;
+        }
+        .centered-title {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #212529;
+        }
+        h1 {
+            color: #212529;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #007bff;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+            font-weight: bold;
+        }
+        td {
+            color: #555;
+        }
+        .logo img {
+            width: 150px; /* Adjust the size as needed */
+            height: 100px; /* Optional: Set a maximum height */
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <table>
+            <tr>
+                <td>
+                    {% if request.session.include_option == 'pdf_company' and request.session.pdf_company %}
+                        <div class="title">
+                            {{ request.session.pdf_company }}
+                        </div>
+                    {% elif request.session.include_option == 'company_logo' and company_logo %}
+                        <div class="logo">
+                            <img src="{{ company_logo }}" alt="Company Logo" />
+                        </div>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <div class="datetime">
+                        Date and Time: {{ current_datetime }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="centered-title">{{ centered_title }}</div>
+
+    <table>
+        <thead>
+            <tr>
+                {% if 'product_id' in columns %}
+                <th style="width: 7%; text-align: center">ID</th>
+                {% endif %}
+                {% if 'product_name' in columns %}
+                <th style="text-align: center">Product Name</th>
+                {% endif %}
+                {% if 'product_quantity' in columns %}
+                <th style="text-align: center">Quantity</th>
+                {% endif %}
+                {% if 'unit_name' in columns %}
+                <th style="text-align: center">Units</th>
+                {% endif %}
+                {% if 'transaction_type' in columns %}
+                <th style="text-align: center">Transaction Type</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for history in history_data %}
+            <tr>
+                {% if 'product_id' in columns %}
+                <td style="text-align: center">
+                    {{ history.product_id.product_id }}
+                </td>
+                {% endif %}
+                {% if 'product_name' in columns %}
+                <td style="text-align: center">
+                    {{ history.product_id.product_name }}
+                </td>
+                {% endif %}
+                {% if 'product_quantity' in columns %}
+                <td style="text-align: center">{{ history.product_quantity }}</td>
+                {% endif %}
+                {% if 'unit_name' in columns %}
+                <td style="text-align: center">
+                    {{ history.product_id.unit.unit_name }}
+                </td>
+                {% endif %}
+                {% if 'transaction_type' in columns %}
+                <td style="text-align: center">{{ history.transaction_type }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

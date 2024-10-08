@@ -1,0 +1,813 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .alert-container {
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .pagination {
+            display: inline-block;
+        }
+
+        .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+            border: 1px solid #ddd;
+        }
+
+        .pagination a.active {
+            background-color: #D3D3D3;
+            color: Black;
+            border: 1px solid #D3D3D3;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+        .small-search-bar {
+            max-width: 300px;
+            width: 100%;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+        .search-form .form-control {
+            flex: 1; /* Allows the input field to take available space */
+            max-width: 250px; /* Optional: sets a maximum width for the input */
+        }
+        .search-form .btn {
+            margin-left: 10px; /* Optional: adds space between input and button */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 5% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-edit {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content-edit {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close-edit {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-edit:hover,
+        .close-edit:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 5% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+            /* The Modal (background) */
+        .modal-edit {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content-edit {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        }
+
+        /* The Close Button */
+        .close-edit {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close-edit:hover,
+        .close-edit:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+        }
+            </style>
+            <style>
+                /* styles.css */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <div id="content-wrapper" class="d-flex flex-column" >
+        <div id="content">
+                    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="position: -webkit-sticky; position: sticky; top: 0; z-index: 1000; height: 75px;">
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                    
+                        <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                            <div class="input-group">
+                                <div class="container">
+                                    <h1>Stock Management</h1>
+                                </div>
+                            </div>
+                        </form>
+                    
+                        <!-- Navbar Links -->
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'home' %}"  style="color:black;">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'product' %}" style="color:black;">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'product_stock' %}" style="color:black;">Product Stock</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'history' %}" style="color:black;">History</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'billing' %}" style="color:black;">Create Bill
+                                </a>
+                            </li>
+                            {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'unit' %}" style="color:black;">Setting</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'register' %}" style="color:black;">Add User</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    
+                        <!-- User Dropdown -->
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item dropdown no-arrow">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-800 big" style="color:black;">{{request.user}}</span>
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="60" height="60">
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                                    <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+    <main class="col-md-9" style="flex: 0 0 87%; max-width: 100%; padding-left: 3px;">
+        <section class="overview">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-12 col-lg-8">
+                        <div class="card shadow mb-4" style="margin-right: 0!important">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager'%}
+                                <button id="openModalButton">Add Unit</button>
+                                {% endif %}
+                                {% if messages %}
+                                <div class="alert-container">
+                                    {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }}">
+                                        {{ message }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+    
+                            <div id="addProductModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close" data-modal="addProductModal">&times;</span>
+                                    <h2>Add Unit</h2>
+                                    <form id="addProductForm" method="post" action="{% url 'unit' %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="unit_name">Unit Name</label>
+                                            <input type="text" name="unit_name" id="unit_name" class="form-control" required>
+                                            <small id="nameError" class="form-text text-danger" style="display: none;">Only letters are allowed.</small>
+                                        </div>
+                                        <button type="submit">Save Unit</button>
+                                    </form>
+                                </div>
+                            </div>
+    
+                            <!-- Add SGST and CGST Inputs -->       
+                            <!-- Table -->
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Units ID</th>
+                                        <th>Units Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for unit in units %}
+                                    <tr>
+                                        <td>{{ unit.id }}</td>
+                                        <td>{{ unit.unit_name }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+    
+                            <div class="pagination">
+                                {% if products.has_previous %}
+                                <a href="?page=1&q={{ query }}"><<</a>
+                                <a href="?page={{ products.previous_page_number }}&q={{ query }}"><</a>
+                                {% endif %}
+    
+                                {% for num in products.paginator.page_range %}
+                                {% if num == products.number %}
+                                <a href="#" class="active">{{ num }}</a>
+                                {% elif num > products.number|add:"-5" and num < products.number|add:"5" %}
+                                <a href="?page={{ num }}&q={{ query }}">{{ num }}</a>
+                                {% elif num == 1 or num == products.paginator.num_pages %}
+                                <a href="?page={{ num }}&q={{ query }}">{{ num }}</a>
+                                {% elif num == products.number|add:"-6" or num == products.number|add:"5" %}
+                                <span>...</span>
+                                {% endif %}
+                                {% endfor %}
+    
+                                {% if products.has_next %}
+                                <a href="?page={{ products.next_page_number }}&q={{ query }}">></a>
+                                <a href="?page={{ products.paginator.num_pages }}&q={{ query }}">>></a>
+                                {% endif %}
+                            </div>
+    
+                        </div>
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h4>Edit PDF</h4>
+                            </div>
+                            <div class="card-body">
+                                <form id="editTitleForm" method="post" action="{% url 'update_pdf_title' %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="pdf_company">Company Name</label>
+                                        <input type="text" name="pdf_company" id="pdf_company" class="form-control" value="{{ request.session.pdf_company|default_if_none:'' }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="centered_title">PDF Title</label>
+                                        <input type="text" name="centered_title" id="centered_title" class="form-control" value="{{ request.session.centered_title|default_if_none:'' }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="company_logo">Company Logo (optional)</label>
+                                        <input type="file" name="company_logo" id="company_logo" class="form-control" value="{{ request.session.company_log }}">
+                                        {% if request.session.company_logo %}
+                                        <div class="mt-2">
+                                            <img src="{{ request.session.company_logo }}" alt="Company Logo" style="max-height: 100px;">
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Choose what to include in PDF:</label>
+                                        <div>
+                                            <input type="radio" name="include_option" id="include_company" value="pdf_company" {% if request.session.include_option == 'pdf_company' %}checked{% endif %}>
+                                            <label for="include_company">Company Name</label>
+                                        </div>
+                                        <div>
+                                            <input type="radio" name="include_option" id="include_logo" value="company_logo" {% if request.session.include_option == 'company_logo' %}checked{% endif %}>
+                                            <label for="include_logo">Company Logo</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="columns">Columns to display:</label>
+                                        <select name="columns" id="columns" class="form-control" multiple>
+                                            <option value="product_id" {% if 'product_id' in request.session.columns %}selected{% endif %}>Product ID</option>
+                                            <option value="product_name" {% if 'product_name' in request.session.columns %}selected{% endif %}>Product Name</option>
+                                            <option value="product_quantity" {% if 'product_quantity' in request.session.columns %}selected{% endif %}>Quantity</option>
+                                            <option value="unit_name" {% if 'unit_name' in request.session.columns %}selected{% endif %}>Units</option>
+                                            <option value="transaction_type" {% if 'transaction_type' in request.session.columns %}selected{% endif %}>Transaction Type</option>
+                                        </select>
+                                        <small class="form-text text-muted">Hold down the Ctrl (Windows) button to select multiple options.</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update PDF</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card shadow mb-4">
+                            <h4>Add Tax Information</h4>
+                            <form id="taxForm" method="post" action="{% url 'billing' %}"> <!-- Adjust URL accordingly -->
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="company-name">Company Name</label>
+                                    <input type="text" id="company-name" name="company_name" required class="form-control" placeholder="Enter company name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sgst">SGST (%)</label>
+                                    <input type="number" name="sgst" id="sgst" class="form-control" placeholder="Enter SGST percentage" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cgst">CGST (%)</label>
+                                    <input type="number" name="cgst" id="cgst" class="form-control" placeholder="Enter CGST percentage" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Tax Info</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+
+    <!-- Add this form after the unit table --> 
+    
+    <script>
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        const stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'Stock Levels',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    
+    <script>
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("myBtn");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+    
+        function closeEditModal(){
+            var modal = document.getElementById("myModal-edit");
+            modal.style.display = "none";
+        }
+    
+    </script>
+    <script>
+            // Function to open the modal
+            function openModal(modalId) {
+                document.getElementById(modalId).style.display = 'block';
+            }
+        
+            // Function to close the modal
+            function closeModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+        
+            // Event listener for the close button
+            document.addEventListener('DOMContentLoaded', function() {
+                const closeButtons = document.querySelectorAll('.close');
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const modalId = button.getAttribute('data-modal');
+                        closeModal(modalId);
+                    });
+                });
+        
+                // Example for opening the modal (you would likely have a button to trigger this)
+                document.getElementById('openModalButton').addEventListener('click', function() {
+                    openModal('addProductModal');
+                });
+            });
+    </script>    
+
+</body>
+</html>

@@ -1,0 +1,693 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .alert-container {
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .pagination {
+            display: inline-block;
+        }
+
+        .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+            border: 1px solid #ddd;
+        }
+
+        .pagination a.active {
+            background-color: #D3D3D3;
+            color: Black;
+            border: 1px solid #D3D3D3;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+        .small-search-bar {
+            max-width: 300px;
+            width: 100%;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+        .search-form .form-control {
+            flex: 1; /* Allows the input field to take available space */
+            max-width: 250px; /* Optional: sets a maximum width for the input */
+        }
+        .search-form .btn {
+            margin-left: 10px; /* Optional: adds space between input and button */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 5% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+            /* The Modal (background) */
+        .modal-edit {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content-edit {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        }
+
+        /* The Close Button */
+        .close-edit {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close-edit:hover,
+        .close-edit:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+        }
+            </style>
+            <style>
+                /* styles.css */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            {% comment %}<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                
+                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <div class="input-group">
+                        <div class="container">
+                            <h1>Stock Management</h1>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- User Information -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-800 big">{{request.user}}</span>
+                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="60" height="60">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                            aria-labelledby="userDropdown">
+                            <a class="dropdown" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="btn " href="{% url 'logout' %}">Logout</a>
+                            </a>
+                            <a class="dropdown" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="btn " href="{% url 'profile' %}">Profile</a>
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>{% endcomment %}
+
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="position: -webkit-sticky; position: sticky; top: 0; z-index: 1000; height: 75px;">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+            
+                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <div class="input-group">
+                        <div class="container">
+                            <h1>Stock Management</h1>
+                        </div>
+                    </div>
+                </form>
+            
+                <!-- Navbar Links -->
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}"  style="color:black;">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product' %}" style="color:black;">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product_stock' %}" style="color:black;">Product Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'history' %}" style="color:black;">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'billing' %}" style="color:black;">Create Bill
+                        </a>
+                    </li>
+                    {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'unit' %}" style="color:black;">Setting</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}" style="color:black;">Add User</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            
+                <!-- User Dropdown -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-800 big" style="color:black;">{{request.user}}</span>
+                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="60" height="60">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                            <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+                    <main class="col-md-9" style="flex: 0 0 87%; max-width: 100%; padding-left: 3px;">
+                        <section class="overview">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-xl-12 col-lg-8">
+                                        <div class="card shadow mb-4">
+                                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+
+                                                <div style="padding: 1px; min-height: 1px;">
+                                                    <form method="get" action="{% url 'product_stock' %}" class="search-form">
+                                                        <input type="text" name="q" id="search" class="form-control" placeholder="Enter product name or ID" value="{{ request.GET.q }}">
+                                                        <button type="submit" class="btn btn-primary">Search</button>
+                                                        <a href="{% url 'product_stock' %}" class="btn btn-primary">Back to History</a>
+                                                    </form>
+                                                </div>                                                
+                                                
+                                                {% if no_results %}
+                                                    <div class="alert alert-warning" role="alert">
+                                                        Your Product not in the table
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                {% if messages %}
+                                                <div class="alert-container">
+                                                    {% for message in messages %}
+                                                        <div class="alert alert-{{ message.tags }}">
+                                                            {{ message }}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == "Manager"%}
+                                                    <button id="addBtn">Add Stock</button>
+                                                {% endif %}
+                                            </div>
+        
+                                <!-- Add Stock Modal -->
+                                <div id="addStockModal" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close" data-modal="addStockModal">&times;</span>
+                                        <h2>Add Stock</h2>
+                                        <form id="addStockForm" method="post" action="{% url 'product_stock' %}">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="add_product_id">Product Name</label>
+                                                <select name="product_id" id="add_product_id" class="form-control" required>
+                                                    <option value="">Choose Product Name</option>
+                                                    {% for product in product_data_all %}
+                                                        <option value="{{ product.product_id }}">{{ product.product_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="display_product_id">Product ID</label>
+                                                <input type="text" name="display_product_id" id="display_product_id" class="form-control" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="add_product_quantity">Product Quantity</label>
+                                                <input type="float" name="product_quantity" id="add_product_quantity" class="form-control" min="0" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="add_transaction_type">Transaction Type</label>
+                                                <select name="transaction_type" id="add_transaction_type" class="form-control" required>
+                                                    <option value="">Select a type</option>
+                                                    <option value="Buy">Buy</option>
+                                                    <option value="Sell">Sell</option>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Add</button>
+                                        </form>
+                                        
+                                    </div>
+                                </div>                       
+
+                                        <table class="table">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>
+                                                        <a href="?page=1&q={{ query }}&sort=product_id&order={% if sort_by == 'product_id' and sort_order == 'asc' %}desc{% else %}asc{% endif %}" style="color: #fff">
+                                                            Product ID
+                                                            {% if sort_by == 'product_id' %}
+                                                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                                                            {% endif %}
+                                                        </a>
+                                                    </th>
+                                                    <th>Product</th>
+                                                    <th>Rate/Item</th>
+                                                    <th>
+                                                        <a href="?page=1&q={{ query }}&sort=product_quantity&order={% if sort_by == 'product_quantity' and sort_order == 'asc' %}desc{% else %}asc{% endif %}" style="color: #fff">
+                                                            Quantity
+                                                            {% if sort_by == 'product_quantity' %}
+                                                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                                                            {% endif %}
+                                                        </a>
+                                                    </th>
+                                                    <th>Units</th>
+                                                    <th>
+                                                        <a href="?page=1&q={{ query }}&sort=updated_date&order={% if sort_by == 'updated_date' and sort_order == 'asc' %}desc{% else %}asc{% endif %}" style="color: #fff">
+                                                            Updated Time
+                                                            {% if sort_by == 'updated_date' %}
+                                                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                                                            {% endif %}
+                                                        </a>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for stock in stock_data %}
+                                                <tr {% if stock.product_quantity < low_stock_threshold %}style="background-color: #D0D0D0;"{% endif %}>
+                                                    <td>{{ stock.product_id.product_id }}</td>
+                                                    <td>{{ stock.product_id.product_name }}</td>
+                                                    <td>{{ stock.product_id.price }}</td>
+                                                    <td>{{ stock.product_quantity }}</td>
+                                                    <td>{{ stock.product_id.unit.unit_name }}</td>
+                                                    <td>{{ stock.updated_date }}</td>
+                                                </tr>   
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        
+                                        <div class="pagination">
+                                            {% if stock_data.has_previous %}
+                                                <a href="?page=1&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}"><<</a>
+                                                <a href="?page={{ stock_data.previous_page_number }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}"><</a>
+                                            {% endif %}
+                                        
+                                            {% for num in stock_data.paginator.page_range %}
+                                                {% if num == stock_data.number %}
+                                                    <a href="#" class="active">{{ num }}</a>
+                                                {% elif num > stock_data.number|add:"-5" and num < stock_data.number|add:"5" %}
+                                                    <a href="?page={{ num }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">{{ num }}</a>
+                                                {% elif num == 1 or num == stock_data.paginator.num_pages %}
+                                                    <a href="?page={{ num }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">{{ num }}</a>
+                                                {% elif num == stock_data.number|add:"-6" or num == stock_data.number|add:"5" %}
+                                                    <span>...</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        
+                                            {% if stock_data.has_next %}
+                                                <a href="?page={{ stock_data.next_page_number }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">></a>
+                                                <a href="?page={{ stock_data.paginator.num_pages }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">>></a>
+                                            {% endif %}
+                                        </div>               
+                                    </div>
+                                </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var addStockModal = document.getElementById('addStockModal');
+            var editStockModal = document.getElementById('editStockModal');
+            var closeButtons = document.querySelectorAll('.close');
+            var addStockForm = document.getElementById('addStockForm');
+            var editStockForm = document.getElementById('editStockForm');
+    
+            // Open add stock modal
+            document.getElementById('addBtn').addEventListener('click', function () {
+                addStockModal.style.display = 'block';
+                addStockForm.reset(); // Clear the form
+                addStockForm.action = "{% url 'product_stock' %}";
+            });
+    
+            // Open edit stock modal
+            document.querySelectorAll('.editBtn').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var id = button.getAttribute('data-id');
+                    var productId = button.getAttribute('data-product-id');
+                    var productQuantity = button.getAttribute('data-product-quantity');
+                    var transactionType = button.getAttribute('data-transaction-type');
+    
+                    editStockModal.style.display = 'block';
+                    editStockForm.action = "{% url 'edit_history' 0 %}".replace('0', id);
+    
+                    document.getElementById('edit_id').value = id;
+                    document.getElementById('edit_product_id').value = productId;
+                    document.getElementById('edit_product_quantity').value = productQuantity;
+                    document.getElementById('edit_transaction_type').value = transactionType;
+                });
+            });
+    
+            // Close modals
+            closeButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var modalId = button.getAttribute('data-modal');
+                    document.getElementById(modalId).style.display = 'none';
+                });
+            });
+    
+            // Close modals when clicking outside
+            window.addEventListener('click', function (event) {
+                if (event.target == addStockModal || event.target == editStockModal) {
+                    addStockModal.style.display = 'none';
+                    editStockModal.style.display = 'none';
+                }
+            });
+
+            document.getElementById('add_product_id').addEventListener('change', function() {
+                var selectedOption = this.options[this.selectedIndex];
+                var productId = selectedOption.value;
+                document.getElementById('display_product_id').value = productId;
+            });
+        });
+    </script>
+
+    <script>
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        const stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'Stock Levels',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("myBtn");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function() {
+        modal.style.display = "block";
+        }
+        span.onclick = function() {
+        modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        }       
+
+        function closeEditModal(){
+            var modal = document.getElementById("myModal-edit");
+            modal.style.display = "none";
+        }
+
+    </script>
+    <script>
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("myBtn");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }       
+    
+        function closeEditModal(){
+            var modal = document.getElementById("myModal-edit");
+            modal.style.display = "none";
+        }
+    
+        </script>
+</body>
+</html>

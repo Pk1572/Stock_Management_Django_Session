@@ -1,0 +1,1036 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .product-checkbox {
+            display: none;
+        }
+        .product-checkbox.show {
+            display: block;
+        }
+        .modal-backdrop {
+            position: static;
+            top: 0;
+            left: 0;
+            z-index: 1040;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+        }
+        .modal-backdrop.show{
+            opacity:0
+        }
+        .alert-container {
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .pagination {
+            display: inline-block;
+          }
+          
+          .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+            border: 1px solid #ddd;
+          }
+          
+          .pagination a.active {
+            background-color: #D3D3D3;
+            color: Black;
+            border: 1px solid #D3D3D3;
+        }
+          
+          .pagination a:hover:not(.active) {
+            background-color: #ddd;
+          }
+        .small-search-bar {
+            max-width: 300px;
+            width: 100%;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+        .search-form .form-control {
+            flex: 1; /* Allows the input field to take available space */
+            max-width: 250px; /* Optional: sets a maximum width for the input */
+        }
+        .search-form .btn {
+            margin-left: 10px; /* Optional: adds space between input and button */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 5% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+            /* The Modal (background) */
+        .modal-edit {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content-edit {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        }
+
+        /* The Close Button */
+        .close-edit {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close-edit:hover,
+        .close-edit:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+        }
+            </style>
+            <style>
+                /* styles.css */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        #content-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #content {
+            flex: 1;
+        }
+
+        .navbar-search .input-group {
+            max-width: 400px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #495057;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .card:last-child {
+            margin-right: 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        /* Modal styling */
+        .modal-content {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            padding: 16px;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            color: #aaa;
+            opacity: 0.8;
+        }
+
+        .close:hover {
+            color: #000;
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .form-check-input {
+            margin-right: 10px;
+        }
+
+        .form-check-label {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        #selectAll {
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 16px;
+            background-color: #f8f9fa;
+            text-align: right;
+        }
+
+        .btn {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        @media (max-width: 767.98px) {
+            .modal-dialog {
+                max-width: 90%;
+                margin: 1.75rem auto;
+            }
+        }
+
+
+    </style>
+    <style>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                background-color: #f4f4f4;
+            }
+    
+            #content-wrapper {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+    
+            #content {
+                flex: 1;
+            }
+    
+            .navbar-search .input-group {
+                max-width: 400px;
+            }
+    
+            .sidebar {
+                background-color: #343a40;
+                color: white;
+                padding: 20px;
+            }
+    
+            .sidebar nav ul {
+                list-style: none;
+                padding: 0;
+            }
+    
+            .sidebar nav ul li {
+                margin-bottom: 15px;
+            }
+    
+            .sidebar nav ul li a {
+                color: white;
+                text-decoration: none;
+            }
+    
+            .sidebar nav ul li a:hover {
+                background-color: #495057;
+                padding: 10px;
+                border-radius: 4px;
+            }
+    
+            .main {
+                padding: 20px;
+            }
+    
+            .cards {
+                display: flex;
+                justify-content: space-between;
+            }
+    
+            .card {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 20px;
+                text-align: center;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                flex: 1;
+                margin-right: 10px;
+            }
+    
+            .card:last-child {
+                margin-right: 0;
+            }
+    
+            .chart {
+                margin: 20px 0;
+            }
+    
+            .table {
+                width: 100%;
+                margin-top: 20px;
+            }
+    
+            footer {
+                background-color: #343a40;
+                color: white;
+                padding: 10px 0;
+                text-align: center;
+            }
+            .modal {
+                display: none; /* Hidden by default */
+                position: fixed; /* Stay in place */
+                z-index: 1; /* Sit on top */
+                left: 0;
+                top: 0;
+                width: 100%; /* Full width */
+                height: 100%; /* Full height */
+                overflow: auto; /* Enable scroll if needed */
+                background-color: rgb(0,0,0); /* Fallback color */
+                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+                padding-top: 60px;
+    
+            /* Modal content */
+            .modal-content {
+                background-color: #fefefe;
+                margin: 5% auto; /* 5% from the top and centered */
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%; /* Could be more or less, depending on screen size */
+            }
+    
+            /* Close button */
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+            }
+    
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+                /* The Modal (background) */
+            .modal-edit {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            }
+    
+            /* Modal Content */
+            .modal-content-edit {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            }
+    
+            /* The Close Button */
+            .close-edit {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            }
+    
+            .close-edit:hover,
+            .close-edit:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+            }
+    </style>
+    <style>
+        .scrollable-list {
+            max-height: 200px; /* Adjust the height as needed */
+            overflow-y: auto;
+        }
+        .scrollable-list .product-item {
+            margin-bottom: 10px;
+        }
+    </style>
+    
+</head>
+<body>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="position: -webkit-sticky; position: sticky; top: 0; z-index: 1000; height: 75px;">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+            
+                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <div class="input-group">
+                        <div class="container">
+                            <h1>Stock Management</h1>
+                        </div>
+                    </div>
+                </form>
+            
+                <!-- Navbar Links -->
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}"  style="color:black;">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product' %}" style="color:black;">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product_stock' %}" style="color:black;">Product Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'history' %}" style="color:black;">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'billing' %}" style="color:black;">Create Bill
+                        </a>
+                    </li>
+                    {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'unit' %}" style="color:black;">Setting</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}" style="color:black;">Add User</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            
+                <!-- User Dropdown -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-800 big" style="color:black;">{{request.user}}</span>
+                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="60" height="60">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                            <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+                    
+        <main class="col-md-9" style="flex: 0 0 87%; max-width: 100%; padding-left: 3px;">
+            <section class="overview">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-8">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+
+                                    <form method="GET" action="{% url 'history' %}" id="product-filter">
+                                        <select name="product" id="product" class="form-select" onchange="document.getElementById('product-filter').submit();">
+                                            <option value="">Select Product</option>
+                                            {% for product in all_products %}
+                                                <option value="{{ product.id }}" {% if request.GET.product == product.id|stringformat:"s" %}selected{% endif %}>{{ product.product_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                    
+                                    <div style="padding: 1px; min-height: 1px; margin-left: -400px;">
+                                        <form method="get" action="{% url 'history' %}" class="search-form">
+                                            <input type="text" name="q" id="search" class="form-control" placeholder="Enter product name or ID" value="{{ request.GET.q }}">
+                                            <button type="submit" class="btn btn-primary">Search</button>
+                                            <a href="{% url 'history' %}" class="btn btn-primary">Back to History</a>
+                                        </form>
+                                    </div>
+                                    
+                                    {% if messages %}
+                                    <div class="alert-container">
+                                        {% for message in messages %}
+                                            <div class="alert alert-{{ message.tags }}">
+                                                {{ message }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if no_results %}
+                                                    <div class="alert alert-warning" role="alert">
+                                                        Your Product not in the table
+                                                    </div>
+                                                {% endif %}
+
+                                    {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                                        <a href="{% url 'create_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-primary">Generate PDF</a>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Edit Stock Modal -->
+                                <div id="editStockModal" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close" data-modal="editStockModal">&times;</span>
+                                        <h2>Edit Stock</h2>
+                                            <form id="editStockForm" method="post" action="{% url 'edit_history' 0 %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" id="edit_id" name="edit_id">
+                                                <input type="hidden" id="edit_product_id" name="product_id">
+                                                <div class="form-group">
+                                                    <label for="edit_product_quantity">Product Quantity</label>
+                                                    <input type="float" name="product_quantity" id="edit_product_quantity" class="form-control" min="0" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Update</button>
+                                            </form>
+                                    </div>
+                                </div>
+
+                                <table class="table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>
+                                                <a href="?page=1&q={{ query }}&sort=product_id&order={% if sort_by == 'product_id' and sort_order == 'asc' %}desc{% else %}asc{% endif %}" style="color: #fff">
+                                                    Product ID
+                                                    {% if sort_by == 'product_id' %}
+                                                        {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                                                    {% endif %}
+                                                </a>
+                                            </th>
+                                            <th>Product</th>
+                                            <th>
+                                                <a href="?page=1&q={{ query }}&sort=product_quantity&order={% if sort_by == 'product_quantity' and sort_order == 'asc' %}desc{% else %}asc{% endif %}" style="color: #fff">
+                                                    Quantity
+                                                    {% if sort_by == 'product_quantity' %}
+                                                        {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                                                    {% endif %}
+                                                </a>
+                                            </th>
+                                            <th>Units</th>
+                                            <th>
+                                                <a href="?page=1&q={{ query }}&sort=updated_date&order={% if sort_by == 'updated_date' and sort_order == 'asc' %}desc{% else %}asc{% endif %}" style="color: #fff">
+                                                    Transaction Type
+                                                    {% if sort_by == 'updated_date' %}
+                                                        {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                                                    {% endif %}
+                                                </a>
+                                            </th>
+                                            {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                                                <th>Actions</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for history in history_data %}
+                                        <tr>    
+                                            <td>{{ history.product_id.product_id }}</td>
+                                            <td>{{ history.product_id }}</td>
+                                            <td>{{ history.product_quantity }}</td>
+                                            <td>{{ history.product_id.unit.unit_name }}</td> 
+                                            <td>{{ history.transaction_type }}</td> 
+                                            {% if history.product_id.is_active %}
+                                                {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                                                    <td>
+                                                        <button class="btn btn-warning editBtn" id="addBtn" 
+                                                            data-id="{{ history.id }}"
+                                                            data-product-id="{{ history.product_id.product_id }}"
+                                                            data-product-quantity="{{ history.product_quantity }}"
+                                                            data-transaction-type="{{ history.transaction_type }}">
+                                                            Edit
+                                                        </button>
+                                                    </td>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if user.role == 'SuperAdmin' or user.role == 'Admin' or user.role == 'Manager' %}
+                                                <td>
+                                                    <button class="btn btn-warning editBtn" disabled>Product Deactivate</button>
+                                                </td>
+                                                {% endif %} 
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                
+                                <div class="pagination">
+                                    {% if page_obj.has_previous %}
+                                        <a href="?page=1&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}"><<</a>
+                                        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}"><</a>
+                                    {% endif %}
+                                
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if num == page_obj.number %}
+                                            <a href="#" class="active">{{ num }}</a>
+                                        {% elif num > page_obj.number|add:"-5" and num < page_obj.number|add:"5" %}
+                                            <a href="?page={{ num }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">{{ num }}</a>
+                                        {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                                            <a href="?page={{ num }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">{{ num }}</a>
+                                        {% elif num == page_obj.number|add:"-6" or num == page_obj.number|add:"5" %}
+                                            <span>...</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                
+                                    {% if page_obj.has_next %}
+                                        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">></a>
+                                        <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}&sort={{ sort_by }}&order={{ sort_order }}">>></a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <script>
+            function generatePDF() {
+                // Get the selected product ID
+                var productSelect = document.getElementById('product');
+                var selectedProductId = productSelect.options[productSelect.selectedIndex].value;
+            
+                // Construct the URL with the selected product ID
+                var url = "{% url 'create_pdf' %}?selectedProducts=" + JSON.stringify([selectedProductId]);
+            
+                // Open the URL in a new window or tab
+                window.open(url, '_blank');
+            }
+            </script>
+        
+        <script>
+            function handleSelectionChange() {
+                var selectElement = document.getElementById('product');
+                var selectedValue = selectElement.value;
+        
+                if (selectedValue === 'all') {
+                    // Redirect to the history page
+                    window.location.href = "{% url 'history' %}";
+                } else {
+                    // Submit the form
+                    document.getElementById('product-filter').submit();
+                }
+            }
+        
+            function generatePDF() {
+                var selectElement = document.getElementById('product');
+                var selectedValue = selectElement.value;
+        
+                if (selectedValue === 'all') {
+                    // Redirect to the PDF creation URL
+                    window.location.href = "{% url 'create_pdf' %}?selectedProducts=[]&all_products=true";
+                } else {
+                    // Redirect to the PDF creation URL
+                    window.location.href = "{% url 'create_pdf' %}?selectedProducts=" + encodeURIComponent(JSON.stringify([selectedValue])) + "&all_products=false";
+                }
+            }
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const productCheckboxes = document.querySelectorAll('#productList .form-check-input');
+        
+                selectAllCheckbox.addEventListener('change', function() {
+                    productCheckboxes.forEach(checkbox => {
+                        checkbox.checked = selectAllCheckbox.checked;
+                    });
+                });
+        
+                productCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (!checkbox.checked) {
+                            selectAllCheckbox.checked = false;
+                        } else {
+                            const allChecked = Array.from(productCheckboxes).every(checkbox => checkbox.checked);
+                            selectAllCheckbox.checked = allChecked;
+                        }
+                    });
+                });
+            });
+        </script>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+            
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                function showModal(modalId) {
+                    document.getElementById(modalId).style.display = 'block';
+                }
+            
+                function hideModal(modalId) {
+                    document.getElementById(modalId).style.display = 'none';
+                }
+            
+                document.querySelectorAll('[data-modal]').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const modalId = this.getAttribute('data-modal');
+                        hideModal(modalId);
+                    });
+                });
+            
+                // Event handler to open the edit modal with pre-filled data
+                document.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const editId = this.getAttribute('data-id');
+                        const productId = this.getAttribute('data-product-id');
+                        const productQuantity = this.getAttribute('data-product-quantity');
+                        const transactionType = this.getAttribute('data-transaction-type');
+            
+                        // Set values in the modal form
+                        document.getElementById('edit_id').value = editId;
+                        document.getElementById('edit_product_id').value = productId;
+                        document.getElementById('edit_product_quantity').value = productQuantity;
+                        document.getElementById('edit_transaction_type').value = transactionType;
+            
+                        showModal('editStockModal');
+                    });
+                });
+            
+                // Close the modal when clicking outside of it
+                window.onclick = function(event) {
+                    if (event.target.classList.contains('modal')) {
+                        hideModal(event.target.id);
+                    }
+                };
+            });
+            </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var addStockModal = document.getElementById('addStockModal');
+                var editStockModal = document.getElementById('editStockModal');
+                var closeButtons = document.querySelectorAll('.close');
+                var addStockForm = document.getElementById('addStockForm');
+                var editStockForm = document.getElementById('editStockForm');
+        
+                // Open add stock modal
+                document.getElementById('addBtn').addEventListener('click', function () {
+                    addStockModal.style.display = 'block';
+                    addStockForm.reset(); // Clear the form
+                    addStockForm.action = "{% url 'history' %}";
+                });
+        
+                // Open edit stock modal
+                document.querySelectorAll('.editBtn').forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        var id = button.getAttribute('data-id');
+                        var productId = button.getAttribute('data-product-id');
+                        var productQuantity = button.getAttribute('data-product-quantity');
+                        var transactionType = button.getAttribute('data-transaction-type');
+        
+                        editStockModal.style.display = 'block';
+                        editStockForm.action = "{% url 'edit_history' 0 %}".replace('0', id);
+        
+                        document.getElementById('edit_id').value = id;
+                        document.getElementById('edit_product_id').value = productId;
+                        document.getElementById('edit_product_quantity').value = productQuantity;
+                        document.getElementById('edit_transaction_type').value = transactionType;
+                    });
+                });
+        
+                // Close modals
+                closeButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        var modalId = button.getAttribute('data-modal');
+                        document.getElementById(modalId).style.display = 'none';
+                    });
+                });
+        
+                // Close modals when clicking outside
+                window.addEventListener('click', function (event) {
+                    if (event.target == addStockModal || event.target == editStockModal) {
+                        addStockModal.style.display = 'none';
+                        editStockModal.style.display = 'none';
+                    }
+                });
+            });
+        </script>
+
+    <script>
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        const stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'Stock Levels',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("myBtn");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }       
+    
+        function closeEditModal(){
+            var modal = document.getElementById("myModal-edit");
+            modal.style.display = "none";
+        }
+    
+        </script>
+</body>
+</html>
