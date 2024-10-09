@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import CustomUser, Product, ProductStock, History, Units
+from .models import CustomUser, Product, ProductStock, History, Units, Invoice
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from django.db.models import Max
 from django.core.paginator import Paginator
@@ -799,21 +799,6 @@ class UpdatePDF(LoginRequiredMixin,View):
         messages.success(request, 'PDF updated successfully!')
         return redirect('unit')
 
-
-from django.contrib import messages
-from django.shortcuts import redirect
-from django.views import View
-from .models import Product, ProductStock, History
-from decimal import Decimal
-from num2words import num2words
-import qrcode
-import base64
-from io import BytesIO
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from xhtml2pdf import pisa
-from django.utils.timezone import now
-
 def convert_to_words(amount):
     return num2words(amount, lang='en')
 
@@ -887,8 +872,17 @@ class BillingView(LoginRequiredMixin, View):
         # Convert total amount to words
         total_amount_words = convert_to_words(grand_total)
 
+        # Save the invoice to the database
+        invoice = Invoice.objects.create(
+            company_name=company_name,
+            customer_name=customer_name,
+            customer_address=customer_address,
+            customer_contact=customer_contact,
+            total_amount=grand_total
+        )
+
         # Generate QR Code for GPay with amount
-        qr_data = f"upi://pay?pa=kalolaparam234@oksbi&pn=Param%20Kalola&mc=YOUR_MERCHANT_CODE&tid=INVOICE_ID&am={grand_total}&cu=INR&tn=Payment%20for%20Invoice"
+        qr_data = f"upi://pay?pa=kalolaparam234@oksbi&pn=Param%20Kalola&mc=YOUR_MERCHANT_CODE&tid={invoice.id}&am={grand_total}&cu=INR&tn=Payment%20for%20Invoice"
         qr_img = qrcode.make(qr_data)
         buffered = BytesIO()
         qr_img.save(buffered, format="PNG")
@@ -912,7 +906,7 @@ class BillingView(LoginRequiredMixin, View):
 
         html_string = render_to_string('invoice.html', context)
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+        response['Content-Disposition'] = f'attachment; filename="invoice_{invoice.id}.pdf"'
 
         pisa_status = pisa.CreatePDF(html_string, dest=response)
 
@@ -928,3 +922,8 @@ class BillingView(LoginRequiredMixin, View):
             product_quantity=product_quantity,
             transaction_type=transaction_type, 
         )
+
+class BillHistoryView(LoginRequiredMixin, View):
+    def get(self, request):
+        invoices = Invoice.objects.all().order_by('-created_at')  # Get all invoices, newest first
+        return render(request, 'bill_history.html', {'invoices': invoices})

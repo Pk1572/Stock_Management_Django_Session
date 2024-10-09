@@ -672,6 +672,7 @@
                                             {% for message in messages %}
                                                 <div class="alert alert-success">{{ message }}</div>
                                             {% endfor %}
+                                            
                                             <form method="post">
                                                 {% csrf_token %}
                                                 <div class="form-group">
@@ -732,6 +733,7 @@
                                                 </table>
                                                 <button type="button" class="btn btn-secondary" onclick="addRow()">Add Product</button>
                                                 <button type="submit" class="btn btn-primary">Generate Invoice</button>
+                                                <a href="{% url 'bill_history' %}" class="btn btn-info">Bill History</a>
                                             </form>
                                         </main>
                                     </div>

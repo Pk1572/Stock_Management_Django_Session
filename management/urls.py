@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from product.views import home, register, login, Logout, ProductView, ProductStockView, HistoryView, profile, changepass, EditProfileView, Unit, ActivateProductView, DeactivateProductView, PDFCreateView, UpdatePDF,PDFView, SendPasswordResetEmailView, ResetPasswordView, BillingView
+from product.views import home, register, login, Logout, ProductView, ProductStockView, HistoryView, profile, changepass, EditProfileView, Unit, ActivateProductView, DeactivateProductView, PDFCreateView, UpdatePDF,PDFView, SendPasswordResetEmailView, ResetPasswordView, BillingView, BillHistoryView
 
 urlpatterns = [
     path('', home.as_view(), name='home'),
@@ -52,6 +52,7 @@ urlpatterns = [
     path('update_pdf_title/', UpdatePDF.as_view(), name='update_pdf_title'),
 
     path('billing/', BillingView.as_view(), name='billing'),
+    path('bill-history/', BillHistoryView.as_view(), name='bill_history'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
